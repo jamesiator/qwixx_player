@@ -1,4 +1,4 @@
-from scorecard import ScoreCard
+from scorecard import ScoreCard, RED, YELLOW, GREEN, BLUE
 
 class Greedy:
   '''
@@ -7,12 +7,12 @@ class Greedy:
   '''
   def __init__(self):
     self.scoreCard = ScoreCard()
+    self.name = 'greedy'
 
   def takeTurn(self, dice):
     '''
     The player must make a move; else take a penalty.
     '''
-    pass
 
   def makeMove(self, dice):
     '''
@@ -23,12 +23,16 @@ class Greedy:
 # player who doesn't skip more than 1 number in any row
 class SkipOne:
   '''
-  This player will give preference to moves that only skip 1 number.
-  If there are multiple choices, choose one at random.
-  If there are no choices and it is this player's turn, it will take a penalty
+  This player will never skip more than 1 number in a row.
+  Choices are 'better' than others if they don't skip any.
+  If there are multiple 'better' choices, choose one at random.
+
+  If there are no choices that satisfy this player's preferences,
+  and it is this player's turn, it will take a penalty.
   '''
   def __init__(self):
     self.scoreCard = ScoreCard()
+    self.name = 'skipOne'
 
   def takeTurn(self, dice):
     '''
@@ -41,12 +45,13 @@ class SkipOne:
 
 class SkipTwo:
   '''
-  This player will give preference to moves that skip no more than 2 numbers.
-  If there are multiple choices, choose one at random.
+  This player will never skip more than 2 number in a row.
+  If there are multiple best choices, choose one at random.
   If there are no choices and it is this player's turn, it will take a penalty
   '''
   def __init__(self):
     self.scoreCard = ScoreCard()
+    self.name = 'skipTwo'
 
   def takeTurn(self, dice):
     pass
@@ -67,6 +72,7 @@ class Utilitarian:
   '''
   def __init__(self):
     self.scoreCard = ScoreCard()
+    self.name = 'utilitarian'
 
   def takeTurn(self, dice):
     pass
@@ -74,5 +80,17 @@ class Utilitarian:
   def makeMove(self, dice):
     pass
 
+class SkipTwoOnce:
+  '''
+  This player will allow itself to skip 2 squares just once during the game.
+  Otherwise it will make the best available decision
+  '''
+  def __init__(self):
+    self.scoreCard = ScoreCard()
+    self.name = 'skipTwoOnce'
 
-  # come up with more strategies
+  def takeTurn(self, dice):
+    pass
+
+  def makeMove(self, dice):
+    pass
