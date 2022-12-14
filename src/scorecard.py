@@ -6,7 +6,7 @@ RED = 'red'
 YELLOW = 'yellow'
 GREEN = 'green'
 BLUE = 'blue'
-COLORS = [RED, YELLOW, GREEN, BLUE]
+COLORS = set((RED, YELLOW, GREEN, BLUE))
 
 class ScoreCard:
 
@@ -116,7 +116,7 @@ class ScoreCard:
     '''
     self.rows[color] = set()
 
-  def printBoard(self):
+  def printCard(self):
     '''
     For displaying board in its current state
     '''
@@ -127,12 +127,22 @@ class ScoreCard:
       BLUE: ''
     }
     for color in COLORS:
-      for i in range(2,13):
-        if i in self.marked[color]:
-          scorecardRows[color] += 'x '
-        else:
-          scorecardRows[color] += f'{i} '
 
+      if color == RED or color == YELLOW:
+        for i in range(2,13):
+          if i in self.marked[color]:
+            scorecardRows[color] += 'x '
+          else:
+            scorecardRows[color] += f'{i} '
+      else: # printing green and blue rows
+        for i in range(12,1,-1):
+          if i in self.marked[color]:
+            scorecardRows[color] += 'x '
+          else:
+            scorecardRows[color] += f'{i} '
+
+      # '$' indicates the bonus slot marked 
+      # if this player locked this row
       if '$' in self.marked[color]:
         scorecardRows[color] += 'x'
       else:
@@ -160,4 +170,4 @@ if __name__ == "__main__":
   # print(testCard.rows[RED])
   # print(testCard.get_total_score())
   # print(testCard.scores)
-  testCard.printBoard()
+  testCard.printCard()

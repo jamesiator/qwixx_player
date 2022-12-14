@@ -24,22 +24,22 @@ players = []
 for i in range(1,len(sys.argv)):
   playerType = str(sys.argv[i]).lower()
   if playerType == 'greedy':
-    players.append(Greedy())
+    players.append(Greedy(f'{playerType}{i}'))
   elif playerType == 'skipone':
-    players.append(SkipOne())
+    players.append(SkipOne(f'{playerType}{i}'))
   elif playerType == 'skiptwo':
-    players.append(SkipTwo())
+    players.append(SkipTwo(f'{playerType}{i}'))
   elif playerType == 'utilitarian':
-    players.append(Utilitarian())
+    players.append(Utilitarian(f'{playerType}{i}'))
   elif playerType == 'skiptwoonce':
-    players.append(SkipTwoOnce())
+    players.append(SkipTwoOnce(f'{playerType}{i}'))
 
 # validate players
 if len(players) < 2:
   print('unknown error')
   exit()
 
-# start the game
+# set up the game
 dice = {
   WHITE1: 0,
   WHITE2: 0,
@@ -48,35 +48,60 @@ dice = {
   GREEN: 0,
   BLUE: 0
 }
-
 game_over = False
-num_locked_rows = 0
 
+# run the game
 while not game_over:
   for i in range(len(players)):
-    # player who's turn it is
+    # get the player whose turn it is
     currentPlayer = players[i]
+    lockedColors = set()
 
-    # roll dice
+    # roll the dice
     for die in dice:
       dice[die] = random.randint(1,6)
 
-    # current player takes turn or penalty
+    # current player takes turn
+    currentPlayerResult = currentPlayer.takeTurn(dice)
+    # if the player took its 4th penalty, no futher turns will be taken
+    if currentPlayerResult == GAME_OVER:
+      game_over = True
+    # if the current player locked a row, store it
+    elif currentPlayerResult in COLORS:
+      lockedColors.add(currentPlayerResult)
 
     # rest of players optionally play
+    for j in range(len(players)):
+      if j != i:
+        result = players[j].makeMove(dice)
+        # if a player locked a row, store which color got locked
+        if result in COLORS:
+          lockedColors.add(result)
 
-    # check if game is over
+    # if a color was locked, remove its die and 
+    # mark its row as locked on each player's scorecard
+    for color in lockedColors:
+      # if color in dice:
+      del dice[color]
+      for player in players:
+        player.scoreCard.lockRow(color)
+
+    # check if game is over due to 2 or more rows being locked
     if len(dice) < 5:
       game_over = True
 
-# now get players' scores and show final standings
+# now get players' scores and show final scorecards
 topScore = 0
 winner = ''
 for player in players:
   print(f"{player.name}'s scorecard:")
-  player.scoreCard.printBoard()
+  player.scoreCard.printCard()
+
   score = player.scoreCard.get_total_score()
   print(f'Score = {score}')
+
+  print('--------------------------------')
+
   if score > topScore:
     topScore = score
     winner = player.name

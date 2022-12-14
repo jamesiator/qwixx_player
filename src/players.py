@@ -10,38 +10,71 @@ class Greedy:
   This player will always make a move if it can.
   If there are more than 1 possible moves, choose one at random.
   '''
-  def __init__(self):
+  def __init__(self, name):
     self.scoreCard = ScoreCard()
-    self.name = 'greedy'
+    self.name = name
 
   def takeTurn(self, dice):
     '''
+    This method is called when it is this player's turn.
     The player must make a move; else take a penalty.
 
     Return a color if its row was locked;
     else return 'game over' if the player took its final penalty;
     else return None
     '''
+    no_move_made = 0
+
     # get sum of white
     whiteSum = dice[WHITE1] + dice[WHITE2]
     
     # get possible moves w/ white value
     possibleMoves = []
-    for color in COLORS:
-      if self.scoreCard.canMarkRow(color, whiteSum):
-        possibleMoves.append(color)
+    for die in dice:
+      if self.scoreCard.canMarkRow(die, whiteSum):
+        possibleMoves.append(die)
 
     # if there are available moves, choose one at random
     if len(possibleMoves) != 0:
       moveIndex = random.randint(0, len(possibleMoves)-1)
-      return self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum)
-    # else if there are no available moves, take a penalty
+      return self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum) # TODO don't return here...
+    # else if there are no available moves, make note.
     else:
+      no_move_made += 1
+
+    # attempt to make a move with a 
+    # non-white + white die combo
+    
+    # get possible moves
+    possibleMoves = []
+    for die in dice:
+      move1 = dice[WHITE1] + dice[die]
+      move2 = dice[WHITE2] + dice[die]
+      
+      if self.scoreCard.canMarkRow(die, move1):
+        possibleMoves.append((die, move1))
+      if self.scoreCard.canMarkRow(die, move2):
+        possibleMoves.append((die, move2))
+
+    # if there are moves available, make one at random
+    if len(possibleMoves) != 0:
+      moveIndex = random.randint(0, len(possibleMoves)-1)
+      color, number = possibleMoves[moveIndex]
+      return self.scoreCard.markRow(color, number) # TODO don't return here...
+    # else make note that no move could be made
+    else:
+      no_move_made += 1
+
+    # check if we made a move or need to take a penalty
+    if no_move_made == 2:
       if self.scoreCard.takePenalty():
         return GAME_OVER
+    else:
+      pass
 
   def makeMove(self, dice):
     '''
+    This method is called when it is not this player's turn.
     If a move can be made, make it.
 
     Return a color if its row was locked;
@@ -49,14 +82,14 @@ class Greedy:
     '''
     # get possible moves
     possibleMoves = []
-    for color in COLORS:
-      move1 = dice[WHITE1] + dice[color]
-      move2 = dice[WHITE2] + dice[color]
+    for die in dice:
+      move1 = dice[WHITE1] + dice[die]
+      move2 = dice[WHITE2] + dice[die]
       
-      if self.scoreCard.canMarkRow(color, move1):
-        possibleMoves.append((color, move1))
-      if self.scoreCard.canMarkRow(color, move2):
-        possibleMoves.append((color, move2))
+      if self.scoreCard.canMarkRow(die, move1):
+        possibleMoves.append((die, move1))
+      if self.scoreCard.canMarkRow(die, move2):
+        possibleMoves.append((die, move2))
 
     # if there are moves available, make one at random
     if len(possibleMoves) != 0:
@@ -64,7 +97,6 @@ class Greedy:
       color, number = possibleMoves[moveIndex]
       return self.scoreCard.markRow(color, number)
 
-# player who doesn't skip more than 1 number in any row
 class SkipOne:
   '''
   This player will never skip more than 1 number in a row.
@@ -74,9 +106,9 @@ class SkipOne:
   If there are no choices that satisfy this player's preferences,
   and it is this player's turn, it will take a penalty.
   '''
-  def __init__(self):
+  def __init__(self, name):
     self.scoreCard = ScoreCard()
-    self.name = 'skipOne'
+    self.name = name
 
   def takeTurn(self, dice):
     '''
@@ -93,9 +125,9 @@ class SkipTwo:
   If there are multiple best choices, choose one at random.
   If there are no choices and it is this player's turn, it will take a penalty
   '''
-  def __init__(self):
+  def __init__(self, name):
     self.scoreCard = ScoreCard()
-    self.name = 'skipTwo'
+    self.name = name
 
   def takeTurn(self, dice):
     pass
@@ -114,9 +146,9 @@ class Utilitarian:
 
   If taking a penalty would cause this player to lose, make the next-best move according to utility
   '''
-  def __init__(self):
+  def __init__(self, name):
     self.scoreCard = ScoreCard()
-    self.name = 'utilitarian'
+    self.name = name
 
   def takeTurn(self, dice):
     pass
@@ -129,9 +161,9 @@ class SkipTwoOnce:
   This player will allow itself to skip 2 squares just once during the game.
   Otherwise it will make the best available decision
   '''
-  def __init__(self):
+  def __init__(self, name):
     self.scoreCard = ScoreCard()
-    self.name = 'skipTwoOnce'
+    self.name = name
 
   def takeTurn(self, dice):
     pass
