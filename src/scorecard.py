@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from colorama import Fore
+
 RED = 'red'
 YELLOW = 'yellow'
 GREEN = 'green'
@@ -13,6 +15,7 @@ class ScoreCard:
     self.penalties = 0
     self.scores = {color: 0 for color in COLORS}
     self.rows = {color: set(i for i in range(2,13)) for color in COLORS}
+    self.marked = {color: set() for color in COLORS}
 
     self.lockNumbers = {
       RED: 12,
@@ -85,10 +88,12 @@ class ScoreCard:
       condition = self.condBlueGreen
 
     self.scores[color] += 1
+    self.marked[color].add(number)
 
     if number == self.lockNumbers[color]:
       self.lockRow(color)
       self.scores[color] += 1
+      self.marked[color].add('$')
     else:
       new_row = set()
       for i in self.rows[color]:
@@ -111,16 +116,48 @@ class ScoreCard:
     '''
     self.rows[color] = set()
 
+  def printBoard(self):
+    '''
+    For displaying board in its current state
+    '''
+    scorecardRows = {
+      RED: '',
+      YELLOW: '',
+      GREEN: '',
+      BLUE: ''
+    }
+    for color in COLORS:
+      for i in range(2,13):
+        if i in self.marked[color]:
+          scorecardRows[color] += 'x '
+        else:
+          scorecardRows[color] += f'{i} '
+
+      if '$' in self.marked[color]:
+        scorecardRows[color] += 'x'
+      else:
+        scorecardRows[color] += '$'
+
+    penalties = 'Penalties: '
+    for i in range(self.penalties):
+      penalties += 'x '
+    print(Fore.RED + scorecardRows[RED])
+    print(Fore.YELLOW + scorecardRows[YELLOW])
+    print(Fore.GREEN + scorecardRows[GREEN])
+    print(Fore.BLUE + scorecardRows[BLUE])
+    print(Fore.WHITE + penalties)
+
 if __name__ == "__main__":
   testCard = ScoreCard()
   testCard.markRow(RED,2)
   testCard.markRow(RED,3)
   testCard.markRow(RED,4)
   testCard.markRow(RED,5)
-  testCard.markRow(RED,6)
-  print(testCard.rows[RED])
-  print(testCard.get_total_score())
+  testCard.markRow(RED,7)
+  # print(testCard.rows[RED])
+  # print(testCard.get_total_score())
   testCard.markRow(RED,12)
-  print(testCard.rows[RED])
-  print(testCard.get_total_score())
+  # print(testCard.rows[RED])
+  # print(testCard.get_total_score())
   # print(testCard.scores)
+  testCard.printBoard()

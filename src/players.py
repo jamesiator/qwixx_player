@@ -1,6 +1,9 @@
 from scorecard import ScoreCard, RED, YELLOW, GREEN, BLUE, COLORS
-from qwixx import WHITE1, WHITE2, GAME_OVER
 import random
+
+WHITE1 = 'white1'
+WHITE2 = 'white2'
+GAME_OVER = 'game over'
 
 class Greedy:
   '''
