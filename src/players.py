@@ -1,4 +1,6 @@
-from scorecard import ScoreCard, RED, YELLOW, GREEN, BLUE
+from scorecard import ScoreCard, RED, YELLOW, GREEN, BLUE, COLORS
+from qwixx import WHITE1, WHITE2, GAME_OVER
+import random
 
 class Greedy:
   '''
@@ -12,13 +14,52 @@ class Greedy:
   def takeTurn(self, dice):
     '''
     The player must make a move; else take a penalty.
+
+    Return a color if its row was locked;
+    else return 'game over' if the player took its final penalty;
+    else return None
     '''
+    # get sum of white
+    whiteSum = dice[WHITE1] + dice[WHITE2]
+    
+    # get possible moves w/ white value
+    possibleMoves = []
+    for color in COLORS:
+      if self.scoreCard.canMarkRow(color, whiteSum):
+        possibleMoves.append(color)
+
+    # if there are available moves, choose one at random
+    if len(possibleMoves) != 0:
+      moveIndex = random.randint(0, len(possibleMoves)-1)
+      return self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum)
+    # else if there are no available moves, take a penalty
+    else:
+      if self.scoreCard.takePenalty():
+        return GAME_OVER
 
   def makeMove(self, dice):
     '''
     If a move can be made, make it.
+
+    Return a color if its row was locked;
+    else return None
     '''
-    pass
+    # get possible moves
+    possibleMoves = []
+    for color in COLORS:
+      move1 = dice[WHITE1] + dice[color]
+      move2 = dice[WHITE2] + dice[color]
+      
+      if self.scoreCard.canMarkRow(color, move1):
+        possibleMoves.append((color, move1))
+      if self.scoreCard.canMarkRow(color, move2):
+        possibleMoves.append((color, move2))
+
+    # if there are moves available, make one at random
+    if len(possibleMoves) != 0:
+      moveIndex = random.randint(0, len(possibleMoves)-1)
+      color, number = possibleMoves[moveIndex]
+      return self.scoreCard.markRow(color, number)
 
 # player who doesn't skip more than 1 number in any row
 class SkipOne:

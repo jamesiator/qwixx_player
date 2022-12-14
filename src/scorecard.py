@@ -74,10 +74,10 @@ class ScoreCard:
 
   def markRow(self, color, number):
     '''
-    Remove any numbers less than/equal to the marked number from the red row.
-    Lock the row if number == 12.
+    Remove any numbers less than/equal to the marked number from <color>'s row.
+    Lock <color>'s row if the number is its locking number.
 
-    return True if red was locked; else return False
+    return <color> if <color>'s row was locked; else return None
     '''
     if color == RED or color == YELLOW:
       condition = self.condRedYellow
@@ -96,7 +96,8 @@ class ScoreCard:
           new_row.add(i)
       self.rows[color] = new_row
 
-    return len(self.rows[color]) == 0
+    if len(self.rows[color]) == 0:
+      return color
 
   def condRedYellow(self, i, number):
     return i > number
