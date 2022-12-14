@@ -19,11 +19,12 @@ class Greedy:
     This method is called when it is this player's turn.
     The player must make a move; else take a penalty.
 
-    Return a color if its row was locked;
+    Return a list of colors whose rows were locked, if any;
     else return 'game over' if the player took its final penalty;
     else return None
     '''
     no_move_made = 0
+    locked_rows = []
 
     # get sum of white
     whiteSum = dice[WHITE1] + dice[WHITE2]
@@ -37,13 +38,15 @@ class Greedy:
     # if there are available moves, choose one at random
     if len(possibleMoves) != 0:
       moveIndex = random.randint(0, len(possibleMoves)-1)
-      return self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum) # TODO don't return here...
-    # else if there are no available moves, make note.
-    else:
+      result = self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum)
+      if result is not None: # did we just lock a row? store the color if so
+        locked_rows.append(result)
+    
+    else: # else if there are no available moves, make note.
       no_move_made += 1
 
-    # attempt to make a move with a 
-    # non-white + white die combo
+    # now attempt to make a move with 
+    # a non-white + white dice combo
     
     # get possible moves
     possibleMoves = []
@@ -52,25 +55,30 @@ class Greedy:
       move2 = dice[WHITE2] + dice[die]
       
       if self.scoreCard.canMarkRow(die, move1):
-        possibleMoves.append((die, move1))
+        possibleMoves.append((die, move1)) # store the (color, #) pair
       if self.scoreCard.canMarkRow(die, move2):
-        possibleMoves.append((die, move2))
+        possibleMoves.append((die, move2)) # store the (color, #) pair
 
     # if there are moves available, make one at random
     if len(possibleMoves) != 0:
       moveIndex = random.randint(0, len(possibleMoves)-1)
       color, number = possibleMoves[moveIndex]
-      return self.scoreCard.markRow(color, number) # TODO don't return here...
-    # else make note that no move could be made
-    else:
+      result = self.scoreCard.markRow(color, number)
+      if result is not None: # did we just lock a row? store the color if so
+        locked_rows.append(result)
+    
+    else: # else make note that no move could be made
       no_move_made += 1
 
     # check if we made a move or need to take a penalty
     if no_move_made == 2:
-      if self.scoreCard.takePenalty():
+      if self.scoreCard.takePenalty(): # returns true if we just took our 4th penalty
         return GAME_OVER
-    else:
-      pass
+    # check if we locked any rows
+    elif len(locked_rows) != 0:
+      return locked_rows
+
+    # else return nothing
 
   def makeMove(self, dice):
     '''

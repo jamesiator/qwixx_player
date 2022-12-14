@@ -66,9 +66,9 @@ while not game_over:
     # if the player took its 4th penalty, no futher turns will be taken
     if currentPlayerResult == GAME_OVER:
       game_over = True
-    # if the current player locked a row, store it
-    elif currentPlayerResult in COLORS:
-      lockedColors.add(currentPlayerResult)
+    # if the current player locked 1 or more rows, store the result
+    elif currentPlayerResult is not None:
+      lockedColors.update(currentPlayerResult) # we know result will be a list
 
     # rest of players optionally play
     for j in range(len(players)):
@@ -91,7 +91,7 @@ while not game_over:
       game_over = True
 
 # now get players' scores and show final scorecards
-topScore = 0
+topScore = -20 # lowest possible score
 winner = ''
 for player in players:
   print(f"{player.name}'s scorecard:")
@@ -106,4 +106,4 @@ for player in players:
     topScore = score
     winner = player.name
 
-print(f'{winner} wins!')
+print(f'{winner} wins with score of {topScore}!')
