@@ -80,22 +80,19 @@ class Greedy:
     Return a color if its row was locked;
     else return None
     '''
+    # get sum of white
+    whiteSum = dice[WHITE1] + dice[WHITE2]
+
     # get possible moves
     possibleMoves = []
     for die in dice:
-      move1 = dice[WHITE1] + dice[die]
-      move2 = dice[WHITE2] + dice[die]
-      
-      if self.scoreCard.canMarkRow(die, move1):
-        possibleMoves.append((die, move1))
-      if self.scoreCard.canMarkRow(die, move2):
-        possibleMoves.append((die, move2))
+      if self.scoreCard.canMarkRow(die, whiteSum):
+        possibleMoves.append(die)
 
-    # if there are moves available, make one at random
+    # if there are available moves, choose one at random
     if len(possibleMoves) != 0:
       moveIndex = random.randint(0, len(possibleMoves)-1)
-      color, number = possibleMoves[moveIndex]
-      return self.scoreCard.markRow(color, number)
+      return self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum)
 
 class SkipOne:
   '''

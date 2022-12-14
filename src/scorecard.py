@@ -70,6 +70,9 @@ class ScoreCard:
 
     Otherwise, simply return whether the given number is available
     '''
+    if color not in COLORS:
+      return False
+
     if number == self.lockNumbers[color]:
       return self.scores[color] > 4
 
