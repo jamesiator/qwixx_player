@@ -24,11 +24,11 @@ def get_possible_moves(scoreCard: ScoreCard, dice, colors=False):
       if scoreCard.canMarkRow(color, move2):
         possibleMoves.append((color, move2))
   else:
-    whiteSum = dice[WHITE1] + dice[WHITE2]
 
+    whiteSum = dice[WHITE1] + dice[WHITE2]
     for color in dice:
       if scoreCard.canMarkRow(color, whiteSum):
-        possibleMoves.append(color)
+        possibleMoves.append((color, whiteSum))
 
   return possibleMoves
 
@@ -52,20 +52,18 @@ class Greedy:
     '''
     no_move_made = 0
     locked_rows = []
-
-    # get sum of white
-    whiteSum = dice[WHITE1] + dice[WHITE2]
     
     # get possible moves w/ white value
     possibleMoves = get_possible_moves(self.scoreCard, dice)
 
     # if there are available moves, choose one at random
     if len(possibleMoves) != 0:
-      moveIndex = random.randint(0, len(possibleMoves)-1)
-      print(f'{self.name} marks {whiteSum} in {possibleMoves[moveIndex]}')
-      result = self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum)
+      color, number = possibleMoves[random.randint(0, len(possibleMoves)-1)]
+      result = self.scoreCard.markRow(color, number)
       if result is not None: # did we just lock a row? store the color if so
         locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
     
     else: # else if there are no available moves, make note.
       no_move_made += 1
@@ -78,12 +76,12 @@ class Greedy:
 
     # if there are moves available, make one at random
     if len(possibleMoves) != 0:
-      moveIndex = random.randint(0, len(possibleMoves)-1)
-      color, number = possibleMoves[moveIndex]
-      print(f'{self.name} marks {number} in {color}')
+      color, number = possibleMoves[random.randint(0, len(possibleMoves)-1)]
       result = self.scoreCard.markRow(color, number)
       if result is not None: # did we just lock a row? store the color if so
         locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
     
     else: # else make note that no move could be made
       no_move_made += 1
@@ -106,17 +104,15 @@ class Greedy:
     Return a color if its row was locked;
     else return None
     '''
-    # get sum of white
-    whiteSum = dice[WHITE1] + dice[WHITE2]
-
     # get possible moves
     possibleMoves = get_possible_moves(self.scoreCard, dice)
 
     # if there are available moves, choose one at random
     if len(possibleMoves) != 0:
-      moveIndex = random.randint(0, len(possibleMoves)-1)
-      print(f'{self.name} marks {whiteSum} in {possibleMoves[moveIndex]}')
-      return self.scoreCard.markRow(possibleMoves[moveIndex], whiteSum)
+      color, number = possibleMoves[random.randint(0, len(possibleMoves)-1)]
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+      return self.scoreCard.markRow(color, number)
 
 class SkipOne:
   '''
@@ -139,9 +135,6 @@ class SkipOne:
     no_move_made = 0
     locked_rows = []
 
-    # get sum of white
-    whiteSum = dice[WHITE1] + dice[WHITE2]
-    
     # get possible moves w/ white value
     possibleMoves = get_possible_moves(self.scoreCard, dice)
 
@@ -152,32 +145,36 @@ class SkipOne:
       'none': [],
       'one': []
     }
-    for move in possibleMoves:
-      if move == RED or move == YELLOW:
-        if whiteSum-1 not in self.scoreCard.rows[move]:
-          validMoves['none'].append(move)
-        elif whiteSum-2 not in self.scoreCard.rows[move]:
-          validMoves['one'].append(move)
+    for color, number in possibleMoves:
+      if color == RED or color == YELLOW:
+        if number-1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number-2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
       else: # green or blue
-        if whiteSum+1 not in self.scoreCard.rows[move]:
-          validMoves['none'].append(move)
-        elif whiteSum+2 not in self.scoreCard.rows[move]:
-          validMoves['one'].append(move)
+        if number+1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number+2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
 
     # if there are options that don't skip any numbers, choose from there
     if len(validMoves['none']) != 0:
-      idx = random.randint(0,len(validMoves['none'])-1)
-      print(f'{self.name} marks {whiteSum} in {validMoves["none"][idx]}')
-      result = self.scoreCard.markRow(validMoves['none'][idx], whiteSum)
+      color, number = validMoves['none'][random.randint(0,len(validMoves['none'])-1)]
+      result = self.scoreCard.markRow(color, number)
       if result is not None: # did we just lock a row? store if so
         locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
     # else if there are options that only skip 1, choose from there
     elif len(validMoves['one']) != 0:
-      idx = random.randint(0, len(validMoves['one'])-1)
-      print(f'{self.name} marks {whiteSum} in {validMoves["one"][idx]}')
-      result = self.scoreCard.markRow(validMoves['one'][idx], whiteSum)
+      color, number = validMoves['one'][random.randint(0, len(validMoves['one'])-1)]
+      result = self.scoreCard.markRow(color, number)
       if result is not None: # did we just lock a row?
         locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
     # else, we won't make a move
     else:
       no_move_made += 1
@@ -207,20 +204,22 @@ class SkipOne:
 
     # if there are options that don't skip a number, choose one at random
     if len(validMoves['none']) != 0:
-      idx = random.randint(0, len(validMoves['none'])-1)
-      color, number = validMoves['none'][idx]
-      print(f'{self.name} marks {number} in {color}')
+      color, number = validMoves['none'][random.randint(0, len(validMoves['none'])-1)]
       result = self.scoreCard.markRow(color, number)
       if result is not None: # did we just lock a row?
         locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
     # else if there are options that only skip one number, choose one at random
     elif len(validMoves['one']) != 0:
-      idx = random.randint(0, len(validMoves['one'])-1)
-      color, number = validMoves['one'][idx]
-      print(f'{self.name} marks {number} in {color}')
+      color, number = validMoves['one'][random.randint(0, len(validMoves['one'])-1)]
       result = self.scoreCard.markRow(color, number)
       if result is not None: # did we just lock a row?
         locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
     # else, we don't make a move
     else:
       no_move_made += 1
@@ -243,9 +242,6 @@ class SkipOne:
     Return a color if its row was locked;
     else return None
     '''
-    # get sum of white
-    whiteSum = dice[WHITE1] + dice[WHITE2]
-    
     # get possible moves w/ white value
     possibleMoves = get_possible_moves(self.scoreCard, dice)
 
@@ -256,28 +252,31 @@ class SkipOne:
       'none': [],
       'one': []
     }
-    for move in possibleMoves:
-      if move == RED or move == YELLOW:
-        if whiteSum-1 not in self.scoreCard.rows[move]:
-          validMoves['none'].append(move)
-        elif whiteSum-2 not in self.scoreCard.rows[move]:
-          validMoves['one'].append(move)
+    for color, number in possibleMoves:
+      if color == RED or color == YELLOW:
+        if number-1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number-2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
       else: # green or blue
-        if whiteSum+1 not in self.scoreCard.rows[move]:
-          validMoves['none'].append(move)
-        elif whiteSum+2 not in self.scoreCard.rows[move]:
-          validMoves['one'].append(move)
+        if number+1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number+2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
 
-    # if there are options that don't skip any numbers, choose from there
+    # if there are options that don't skip any numbers, choose one at random
     if len(validMoves['none']) != 0:
-      idx = random.randint(0,len(validMoves['none'])-1)
-      print(f'{self.name} marks {whiteSum} in {validMoves["none"][idx]}')
-      return self.scoreCard.markRow(validMoves['none'][idx], whiteSum)
+      color, number = validMoves['none'][random.randint(0,len(validMoves['none'])-1)]
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+      return self.scoreCard.markRow(color, number)
+
     # else if there are options that only skip 1, choose from there
     elif len(validMoves['one']) != 0:
-      idx = random.randint(0, len(validMoves['one'])-1)
-      print(f'{self.name} marks {whiteSum} in {validMoves["one"][idx]}')
-      return self.scoreCard.markRow(validMoves['one'][idx], whiteSum)
+      color, number = validMoves['one'][random.randint(0, len(validMoves['one'])-1)]
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+      return self.scoreCard.markRow(color, number)
 
 class SkipTwo:
   '''
