@@ -46,6 +46,7 @@ class ScoreCard:
     
     return True if the game is over; else return False
     '''
+    print('penalty taken')
     self.penalties += 1
     return self.penalties == 4
 

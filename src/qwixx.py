@@ -61,6 +61,9 @@ while not game_over:
     for die in dice:
       dice[die] = random.randint(1,6)
 
+    print(f"{currentPlayer.name}'s turn")
+    print(dice)
+
     # current player takes turn
     currentPlayerResult = currentPlayer.takeTurn(dice)
     # if the player took its 4th penalty, no futher turns will be taken
