@@ -491,10 +491,32 @@ class Utilitarian:
     self.name = name
 
   def takeTurn(self, dice):
-    pass
+    '''
+    
+    '''
 
   def makeMove(self, dice):
-    pass
+    '''
+    
+    '''
+    possibleMoves = get_possible_moves(self.scoreCard, dice)
+
+    bestMoves = []
+    bestUtility = 0
+
+    for color, number in possibleMoves:
+      # get utility of the move, store if tie or better than current best
+      utility = self.scoreCard.get_utility(color)
+      if utility > bestUtility:
+        bestMoves = [(color, number)]
+        bestUtility = utility
+      elif utility == bestUtility:
+        bestMoves.append((color, number))
+      # else don't store the move
+    
+    # choose one of the optimal moves by utiltiy
+    color, number = bestMoves[random.randint(0, len(bestMoves)-1)]
+    return self.scoreCard.markRow(color, number)
 
 class SkipTwoOnce:
   '''

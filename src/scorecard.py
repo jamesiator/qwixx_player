@@ -30,14 +30,31 @@ class ScoreCard:
     '''
     score = 0
 
-    for key in self.scores:
-      for i in range(self.scores[key]):
-        score += i + 1
+    for color in self.scores:
+      score += self.get_score(color)
 
     for i in range(self.penalties):
       score -= 5
 
     return score
+
+  def get_score(self, color):
+    '''
+    Get score of a specific row
+    '''
+    score = 0
+    for i in range(self.scores[color]):
+      score += i + 1
+    return score
+
+  def get_utility(self, color):
+    '''
+    Get the value of marking an additional number in a specific row
+    '''
+    score = 0
+    for i in range(self.scores[color]+1):
+      score += i + 1
+    return score - self.get_score(color)
 
   def takePenalty(self):
     '''
