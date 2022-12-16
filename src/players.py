@@ -289,10 +289,191 @@ class SkipTwo:
     self.name = name
 
   def takeTurn(self, dice):
-    pass
+    '''
+    collect and sort valid moves. Prioritize best moves, allowing moves that skip up to two numbers
+    '''
+    no_move_made = 0
+    locked_rows = []
+
+    possibleMoves = get_possible_moves(self.scoreCard, dice)
+
+    # prioritize
+    validMoves = {
+      'none': [],
+      'one': [],
+      'two': []
+    }
+
+    for color, number in possibleMoves:
+      if color == RED or color == YELLOW:
+        if number-1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number-2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
+        elif number-3 not in self.scoreCard.rows[color]:
+          validMoves['two'].append((color, number))
+      else: # green or blue
+        if number+1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number+2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
+        elif number+3 not in self.scoreCard.rows[color]:
+          validMoves['two'].append((color, number))
+
+    # if there are options that don't skip any numbers, choose one
+    if len(validMoves['none']) != 0:
+      color, number = validMoves['none'][random.randint(0, len(validMoves['none'])-1)]
+      result = self.scoreCard.markRow(color, number)
+      if result is not None:
+        locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
+    # else if there are options that skip just one number, choose one
+    elif len(validMoves['one']) != 0:
+      color, number = validMoves['one'][random.randint(0, len(validMoves['one'])-1)]
+      result = self.scoreCard.markRow(color, number)
+      if result is not None:
+        locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')      
+
+    # else if there are options that skip just 2 numbers, choose ont
+    elif len(validMoves['two']) != 0:
+      color, number = validMoves['two'][random.randint(0, len(validMoves['two'])-1)]
+      result = self.scoreCard.markRow(color, number)
+      if result is not None:
+        locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
+    # else don't make a move
+    else:
+      no_move_made += 1
+
+    # now attempt to make a move with a white/nonwhite dice combo
+
+    possibleMoves = get_possible_moves(self.scoreCard, dice, colors=True)
+
+    # prioritize moves
+    validMoves = {
+      'none': [],
+      'one': [],
+      'two': []
+    }
+
+    for color, number in possibleMoves:
+      if color == RED or color == YELLOW:
+        if number-1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number-2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
+        elif number-3 not in self.scoreCard.rows[color]:
+          validMoves['two'].append((color, number))
+      else: # green or blue
+        if number+1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number+2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
+        elif number+3 not in self.scoreCard.rows[color]:
+          validMoves['two'].append((color, number))
+
+    # if there are moves that don't skip any numbers, choose one
+    if len(validMoves['none']) != 0:
+      color, number = validMoves['none'][random.randint(0, len(validMoves['none'])-1)]
+      result = self.scoreCard.markRow(color, number)
+      if result is not None: # did we just lock a row?
+        locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
+    # else if there are moves that only skip one number, choose one
+    elif len(validMoves['one']) != 0:
+      color, number = validMoves['one'][random.randint(0, len(validMoves['one'])-1)]
+      result = self.scoreCard.markRow(color, number)
+      if result is not None: # did we just lock a row?
+        locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
+    # else if there are moves that only skip two numbers, choose one
+    elif len(validMoves['two']) != 0:
+      color, number = validMoves['two'][random.randint(0, len(validMoves['two'])-1)]
+      result = self.scoreCard.markRow(color, number)
+      if result is not None:
+        locked_rows.append(result)
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+
+    # else don't make a move
+    else:
+      no_move_made += 1
+      
+    # check if we made a move or need to take a penalty
+    if no_move_made == 2:
+      if self.scoreCard.takePenalty(): # returns true if we just took our 4th penalty
+        return GAME_OVER
+    # check if we locked any rows
+    elif len(locked_rows) != 0:
+      return locked_rows
+
+    # else return nothing
 
   def makeMove(self, dice):
-    pass
+    '''
+    This method is called when it is not this player's turn.
+    If a move can be made that skips no more than 2 squares, make it.
+
+    Return a color if its row was locked;
+    else return None
+    '''
+    # get possible moves w/ white value
+    possibleMoves = get_possible_moves(self.scoreCard, dice)
+
+    # prioritize:
+    # if a move skips more than 1, discard it
+    # store options that skip 1 or 0
+    validMoves = {
+      'none': [],
+      'one': [],
+      'two': []
+    }
+    for color, number in possibleMoves:
+      if color == RED or color == YELLOW:
+        if number-1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number-2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
+        elif number-3 not in self.scoreCard.rows[color]:
+          validMoves['two'].append((color, number))
+      else: # green or blue
+        if number+1 not in self.scoreCard.rows[color]:
+          validMoves['none'].append((color, number))
+        elif number+2 not in self.scoreCard.rows[color]:
+          validMoves['one'].append((color, number))
+        elif number+3 not in self.scoreCard.rows[color]:
+          validMoves['two'].append((color, number))
+
+    # if there are moves that don't skip any numbers, choose one
+    if len(validMoves['none']) != 0:
+      color, number = validMoves['none'][random.randint(0,len(validMoves['none'])-1)]
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+      return self.scoreCard.markRow(color, number)
+
+    # else if there are moves that only skip 1, choose one
+    elif len(validMoves['one']) != 0:
+      color, number = validMoves['one'][random.randint(0, len(validMoves['one'])-1)]
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+      return self.scoreCard.markRow(color, number)
+
+    # else if there are moves that only skip 2, choose one
+    elif len(validMoves['two']) != 0:
+      color, number = validMoves['two'][random.randint(0, len(validMoves['two'])-1)]
+      # debug
+      print(f'{self.name} marks {number} in {color}')
+      return self.scoreCard.markRow(color, number)
 
 class Utilitarian:
   '''
