@@ -93,9 +93,12 @@ while not game_over:
     if len(dice) < 5:
       game_over = True
 
+    if game_over: break
+
 # now get players' scores and show final scorecards
 topScore = -20 # lowest possible score
 winner = ''
+print('--------------------------------')
 for player in players:
   print(f"{player.name}'s scorecard:")
   player.scoreCard.printCard()
